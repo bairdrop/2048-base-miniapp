@@ -1,18 +1,24 @@
+'use client';
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { ArrowUp, ArrowDown, ArrowLeft, ArrowRight, RotateCcw, Trophy } from 'lucide-react';
 
 const Game2048 = () => {
-  const [grid, setGrid] = useState([]);
+  const [grid, setGrid] = useState<number[][]>([]);
   const [score, setScore] = useState(0);
   const [bestScore, setBestScore] = useState(0);
   const [gameOver, setGameOver] = useState(false);
   const [won, setWon] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const SIZE = 4;
 
   // Initialize game
   useEffect(() => {
-    const saved = localStorage.getItem('2048-best');
-    if (saved) setBestScore(parseInt(saved));
+    setMounted(true);
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('2048-best');
+      if (saved) setBestScore(parseInt(saved));
+    }
     initGame();
   }, []);
 
@@ -26,8 +32,8 @@ const Game2048 = () => {
     setWon(false);
   };
 
-  const addNewTile = (currentGrid) => {
-    const empty = [];
+  const addNewTile = (currentGrid: number[][]) => {
+    const empty: [number, number][] = [];
     for (let i = 0; i < SIZE; i++) {
       for (let j = 0; j < SIZE; j++) {
         if (currentGrid[i][j] === 0) empty.push([i, j]);
@@ -39,7 +45,7 @@ const Game2048 = () => {
     }
   };
 
-  const slideAndMergeRow = (row) => {
+  const slideAndMergeRow = (row: number[]) => {
     // Remove zeros
     let newRow = row.filter(val => val !== 0);
     let addScore = 0;
@@ -68,7 +74,7 @@ const Game2048 = () => {
   };
 
   const moveLeft = () => {
-    let newGrid = [];
+    let newGrid: number[][] = [];
     let totalScore = 0;
     let moved = false;
 
@@ -92,7 +98,7 @@ const Game2048 = () => {
   };
 
   const moveRight = () => {
-    let newGrid = [];
+    let newGrid: number[][] = [];
     let totalScore = 0;
     let moved = false;
 
@@ -121,7 +127,7 @@ const Game2048 = () => {
     let moved = false;
 
     for (let j = 0; j < SIZE; j++) {
-      const column = [];
+      const column: number[] = [];
       for (let i = 0; i < SIZE; i++) {
         column.push(grid[i][j]);
       }
@@ -155,7 +161,7 @@ const Game2048 = () => {
     let moved = false;
 
     for (let j = 0; j < SIZE; j++) {
-      const column = [];
+      const column: number[] = [];
       for (let i = SIZE - 1; i >= 0; i--) {
         column.push(grid[i][j]);
       }
@@ -182,16 +188,18 @@ const Game2048 = () => {
     }
   };
 
-  const updateScore = (addScore) => {
+  const updateScore = (addScore: number) => {
     const newScore = score + addScore;
     setScore(newScore);
     if (newScore > bestScore) {
       setBestScore(newScore);
-      localStorage.setItem('2048-best', newScore.toString());
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('2048-best', newScore.toString());
+      }
     }
   };
 
-  const checkGameOver = (currentGrid) => {
+  const checkGameOver = (currentGrid: number[][]) => {
     // Check if there are any empty cells
     for (let i = 0; i < SIZE; i++) {
       for (let j = 0; j < SIZE; j++) {
@@ -210,7 +218,7 @@ const Game2048 = () => {
     setGameOver(true);
   };
 
-  const handleKeyPress = useCallback((e) => {
+  const handleKeyPress = useCallback((e: KeyboardEvent) => {
     if (gameOver) return;
     
     if (e.key === 'ArrowLeft') {
@@ -229,12 +237,14 @@ const Game2048 = () => {
   }, [grid, gameOver]);
 
   useEffect(() => {
-    window.addEventListener('keydown', handleKeyPress);
-    return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [handleKeyPress]);
+    if (mounted) {
+      window.addEventListener('keydown', handleKeyPress);
+      return () => window.removeEventListener('keydown', handleKeyPress);
+    }
+  }, [handleKeyPress, mounted]);
 
-  const getTileColor = (value) => {
-    const colors = {
+  const getTileColor = (value: number) => {
+    const colors: {[key: number]: string} = {
       0: 'bg-gray-300',
       2: 'bg-blue-100 text-gray-800',
       4: 'bg-blue-200 text-gray-800',
@@ -252,11 +262,15 @@ const Game2048 = () => {
     return colors[value] || 'bg-gray-900 text-white';
   };
 
-  const getTileSize = (value) => {
+  const getTileSize = (value: number) => {
     if (value >= 1024) return 'text-2xl';
     if (value >= 128) return 'text-3xl';
     return 'text-4xl';
   };
+
+  if (!mounted) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
