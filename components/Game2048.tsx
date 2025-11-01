@@ -42,7 +42,7 @@ export default function Game2048() {
   useEffect(() => {
     const loadData = async () => {
       try {
-        const leaderboardResult = await window.storage.get('leaderboard', true);
+        const leaderboardResult = await window.storage?.get('leaderboard', true);
         if (leaderboardResult) {
           const data = JSON.parse(leaderboardResult.value);
           setLeaderboard(data.sort((a: LeaderboardEntry, b: LeaderboardEntry) => b.score - a.score).slice(0, 10));
@@ -52,7 +52,7 @@ export default function Game2048() {
       }
 
       try {
-        const bestResult = await window.storage.get('bestScore', false);
+        const bestResult = await window.storage?.get('bestScore', false);
         if (bestResult) {
           setBestScore(parseInt(bestResult.value));
         }
@@ -60,7 +60,10 @@ export default function Game2048() {
         console.log('No best score yet');
       }
     };
-    loadData();
+    
+    if (typeof window !== 'undefined') {
+      loadData();
+    }
   }, []);
 
   // Initialize game
@@ -170,7 +173,9 @@ export default function Game2048() {
       setScore(newScore);
       if (newScore > bestScore) {
         setBestScore(newScore);
-        window.storage.set('bestScore', newScore.toString(), false);
+        if (window.storage) {
+          window.storage.set('bestScore', newScore.toString(), false).catch(err => console.log('Failed to save best score'));
+        }
       }
 
       const emptyPositions = getEmptyPositions(newTiles);
@@ -274,11 +279,13 @@ export default function Game2048() {
       .sort((a, b) => b.score - a.score)
       .slice(0, 10);
 
-    try {
-      await window.storage.set('leaderboard', JSON.stringify(updatedLeaderboard), true);
-      setLeaderboard(updatedLeaderboard);
-    } catch (error) {
-      console.error('Failed to save to leaderboard:', error);
+    if (window.storage) {
+      try {
+        await window.storage.set('leaderboard', JSON.stringify(updatedLeaderboard), true);
+        setLeaderboard(updatedLeaderboard);
+      } catch (error) {
+        console.error('Failed to save to leaderboard:', error);
+      }
     }
 
     // Share on Farcaster
