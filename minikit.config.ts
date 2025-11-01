@@ -1,28 +1,32 @@
 // Base Mini App Configuration
-// No external dependencies needed
 interface AccountAssociation {
   header?: string;
   payload?: string;
   signature?: string;
 }
+
 interface MiniAppConfig {
   name: string;
-  subtitle: string;
-  description: string;
+  subtitle?: string;
+  description?: string;
   version: string;
   url: string;
   iconUrl: string;
   splashImageUrl: string;
   splashBackgroundColor: string;
   homeUrl: string;
-  screenshotUrls: string[];
-  primaryCategory: string;
-  tags: string[];
-  accountAssociation: AccountAssociation;
+  screenshotUrls?: string[];
+  primaryCategory?: string;
+  tags?: string[];
+  accountAssociation?: AccountAssociation;
 }
+
 interface AppConfig {
   miniapp: MiniAppConfig;
 }
+
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://2048-base-miniapp.vercel.app';
+
 export const config: { app: AppConfig } = {
   app: {
     miniapp: {
@@ -30,18 +34,17 @@ export const config: { app: AppConfig } = {
       subtitle: 'Classic puzzle game on Base',
       description: 'Join the numbers to reach 2048! A classic sliding puzzle game where you combine tiles with the same numbers. Swipe to move tiles and merge them together. Can you reach 2048?',
       version: '1.0.0',
-      url: process.env.NEXT_PUBLIC_APP_URL || 'https://2048-base-miniapp.vercel.app',
-      iconUrl: `${process.env.NEXT_PUBLIC_APP_URL}/icon.png`,
-      splashImageUrl: `${process.env.NEXT_PUBLIC_APP_URL}/splash.png`,
-      splashBackgroundColor: '#FF8C32',
-      homeUrl: `${process.env.NEXT_PUBLIC_APP_URL}`,
+      url: APP_URL,
+      iconUrl: `${APP_URL}/icon.png`,
+      splashImageUrl: `${APP_URL}/splash.png`,
+      splashBackgroundColor: '#4F46E5',
+      homeUrl: APP_URL,
       screenshotUrls: [
-        `${process.env.NEXT_PUBLIC_APP_URL}/screenshot1.png`,
-        `${process.env.NEXT_PUBLIC_APP_URL}/screenshot2.png`
+        `${APP_URL}/screenshot1.png`,
+        `${APP_URL}/screenshot2.png`
       ],
       primaryCategory: 'games',
       tags: ['puzzle', 'casual', 'strategy', 'numbers'],
-      
       accountAssociation: {
         header: "eyJmaWQiOjUyNjk5NiwidHlwZSI6ImN1c3RvZHkiLCJrZXkiOiIweDQ4YURERTk1ZkY1OGNjQzRBRTkxYjM3YzY4NkVmQTA3OTFhMDUxMDcifQ",
         payload: "eyJkb21haW4iOiIyMDQ4LWJhc2UtbWluaWFwcC52ZXJjZWwuYXBwIn0",
