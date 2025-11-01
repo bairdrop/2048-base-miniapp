@@ -1,6 +1,32 @@
-import type { Minikit } from '@coinbase/onchainkit/farcaster';
+// Base Mini App Configuration
+// No external dependencies needed
 
-export const config: Minikit.Config = {
+interface AccountAssociation {
+  header?: string;
+  payload?: string;
+  signature?: string;
+}
+
+interface MiniAppConfig {
+  name: string;
+  subtitle: string;
+  description: string;
+  version: string;
+  url: string;
+  iconUrl: string;
+  splashImageUrl: string;
+  homeUrl: string;
+  screenshotUrls: string[];
+  primaryCategory: string;
+  tags: string[];
+  accountAssociation: AccountAssociation;
+}
+
+interface AppConfig {
+  miniapp: MiniAppConfig;
+}
+
+export const config: { app: AppConfig } = {
   app: {
     miniapp: {
       name: '2048 Merge Master',
@@ -19,7 +45,11 @@ export const config: Minikit.Config = {
       tags: ['puzzle', 'casual', 'strategy', 'numbers'],
       
       accountAssociation: {
-        // Fill this after Step 7 (signing manifest)
+        // Leave empty for now. After deploying and signing at base.dev/preview,
+        // add your signature here like this:
+        // header: 'eyJmaWQ...',
+        // payload: 'eyJkb21...',
+        // signature: 'MHg3Zm...'
       }
     }
   }
