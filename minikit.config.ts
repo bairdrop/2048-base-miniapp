@@ -1,12 +1,10 @@
 // Base Mini App Configuration
 // No external dependencies needed
-
 interface AccountAssociation {
   header?: string;
   payload?: string;
   signature?: string;
 }
-
 interface MiniAppConfig {
   name: string;
   subtitle: string;
@@ -21,11 +19,9 @@ interface MiniAppConfig {
   tags: string[];
   accountAssociation: AccountAssociation;
 }
-
 interface AppConfig {
   miniapp: MiniAppConfig;
 }
-
 export const config: { app: AppConfig } = {
   app: {
     miniapp: {
@@ -45,11 +41,9 @@ export const config: { app: AppConfig } = {
       tags: ['puzzle', 'casual', 'strategy', 'numbers'],
       
       accountAssociation: {
-        // Leave empty for now. After deploying and signing at base.dev/preview,
-        // add your signature here like this:
-        // header: 'eyJmaWQ...',
-        // payload: 'eyJkb21...',
-        // signature: 'MHg3Zm...'
+        header: "eyJmaWQiOjUyNjk5NiwidHlwZSI6ImN1c3RvZHkiLCJrZXkiOiIweDQ4YURERTk1ZkY1OGNjQzRBRTkxYjM3YzY4NkVmQTA3OTFhMDUxMDcifQ",
+        payload: "eyJkb21haW4iOiIyMDQ4LWJhc2UtbWluaWFwcC52ZXJjZWwuYXBwIn0",
+        signature: "VzGlpSDK1Iki14JAH/xGUJ8QNGm14offv0SPHuN2FhtVSqvt/Wre3VxF5QsjYDat4v7fynIKp/S4nLhYqMHwwRs="
       }
     }
   }
