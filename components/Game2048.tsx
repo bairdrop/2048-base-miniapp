@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { RotateCcw, Trophy } from 'lucide-react';
+import { RotateCcw, Trophy, Clock, Gamepad2 } from 'lucide-react';
 
 interface LeaderboardEntry {
   username: string;
@@ -22,13 +22,15 @@ declare global {
 }
 
 const Game2048 = () => {
+  const [currentScreen, setCurrentScreen] = useState<'home' | 'game' | 'leaderboard'>('home');
+  const [gameMode, setGameMode] = useState<'normal' | 'timed'>('normal');
+  const [timeLeft, setTimeLeft] = useState(30);
   const [grid, setGrid] = useState<number[][]>([]);
   const [score, setScore] = useState(0);
   const [bestScore, setBestScore] = useState(0);
   const [gameOver, setGameOver] = useState(false);
   const [won, setWon] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const [showLeaderboard, setShowLeaderboard] = useState(false);
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [username, setUsername] = useState('');
   const [touchStart, setTouchStart] = useState<{ x: number; y: number } | null>(null);
@@ -59,8 +61,30 @@ const Game2048 = () => {
     if (typeof window !== 'undefined') {
       loadData();
     }
-    initGame();
   }, []);
+
+  // Timer effect for timed mode
+  useEffect(() => {
+    if (currentScreen === 'game' && gameMode === 'timed' && !gameOver && !won && timeLeft > 0) {
+      const timer = setInterval(() => {
+        setTimeLeft(prev => {
+          if (prev <= 1) {
+            setGameOver(true);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+      return () => clearInterval(timer);
+    }
+  }, [currentScreen, gameMode, gameOver, won, timeLeft]);
+
+  const startGame = (mode: 'normal' | 'timed') => {
+    setGameMode(mode);
+    setTimeLeft(30);
+    initGame();
+    setCurrentScreen('game');
+  };
 
   const initGame = () => {
     const newGrid = Array(SIZE).fill(null).map(() => Array(SIZE).fill(0));
@@ -251,7 +275,7 @@ const Game2048 = () => {
   };
 
   const handleKeyPress = useCallback((e: KeyboardEvent) => {
-    if (gameOver) return;
+    if (gameOver || currentScreen !== 'game') return;
     
     if (e.key === 'ArrowLeft') {
       e.preventDefault();
@@ -266,7 +290,7 @@ const Game2048 = () => {
       e.preventDefault();
       moveDown();
     }
-  }, [grid, gameOver]);
+  }, [grid, gameOver, currentScreen]);
 
   useEffect(() => {
     if (mounted) {
@@ -361,25 +385,76 @@ const Game2048 = () => {
     return null;
   }
 
-  // Leaderboard view
-  if (showLeaderboard) {
+  // Home Screen
+  if (currentScreen === 'home') {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
         <div className="w-full max-w-md">
           <div className="bg-white rounded-2xl shadow-2xl p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h1 className="text-4xl font-bold text-indigo-600 flex items-center gap-2">
-                <Trophy size={36} /> Leaderboard
-              </h1>
+            {/* Top Half - Icon */}
+            <div className="flex justify-center items-center mb-8 pt-8">
+              <img 
+                src="https://2048-base-miniapp.vercel.app/icon.png" 
+                alt="2048 Game Icon" 
+                className="w-[100px] h-[100px] rounded-2xl shadow-lg"
+              />
+            </div>
+
+            {/* Buttons */}
+            <div className="space-y-4 mb-8">
               <button
-                onClick={() => setShowLeaderboard(false)}
-                className="bg-gray-700 hover:bg-gray-800 text-white rounded-lg px-4 py-2 font-bold transition-colors"
+                onClick={() => startGame('timed')}
+                className="w-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-bold py-4 px-6 rounded-lg transition-colors flex items-center justify-center gap-3"
               >
-                Back
+                <Clock size={24} />
+                Play Against Time (30s)
+              </button>
+              
+              <button
+                onClick={() => startGame('normal')}
+                className="w-full bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white font-bold py-4 px-6 rounded-lg transition-colors flex items-center justify-center gap-3"
+              >
+                <Gamepad2 size={24} />
+                Play Normal Game
+              </button>
+              
+              <button
+                onClick={() => setCurrentScreen('leaderboard')}
+                className="w-full bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600 text-white font-bold py-4 px-6 rounded-lg transition-colors flex items-center justify-center gap-3"
+              >
+                <Trophy size={24} />
+                Leaderboard
               </button>
             </div>
+
+            {/* Bottom Half - Description */}
+            <div className="text-center pb-4">
+              <h2 className="text-2xl font-bold text-indigo-600 mb-4">How to Play</h2>
+              <div className="text-gray-600 space-y-2">
+                <p className="text-sm">Use arrow keys on desktop or swipe on mobile to move tiles.</p>
+                <p className="text-sm">When two tiles with the same number touch, they merge into one!</p>
+                <p className="text-sm font-semibold">Goal: Reach the 2048 tile to win!</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Leaderboard Screen
+  if (currentScreen === 'leaderboard') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+        <div className="w-full max-w-md">
+          <div className="bg-white rounded-2xl shadow-2xl p-6">
+            <div className="mb-6">
+              <h1 className="text-4xl font-bold text-indigo-600 flex items-center justify-center gap-2">
+                <Trophy size={36} /> Leaderboard
+              </h1>
+            </div>
             
-            <div className="space-y-3">
+            <div className="space-y-3 mb-6" style={{ minHeight: '400px' }}>
               {leaderboard.length === 0 ? (
                 <p className="text-gray-600 text-center py-8">No scores yet. Be the first!</p>
               ) : (
@@ -399,19 +474,33 @@ const Game2048 = () => {
                 ))
               )}
             </div>
+
+            <button
+              onClick={() => setCurrentScreen('home')}
+              className="w-full bg-gray-700 hover:bg-gray-800 text-white rounded-lg py-3 font-bold transition-colors"
+            >
+              Back
+            </button>
           </div>
         </div>
       </div>
     );
   }
 
+  // Game Screen
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="bg-white rounded-2xl shadow-2xl p-6">
           {/* Header */}
           <div className="text-center mb-6">
-            <h1 className="text-5xl font-bold text-indigo-600 mb-2">2048</h1>
+            <div className="flex justify-center mb-2">
+              <img 
+                src="https://2048-base-miniapp.vercel.app/icon.png" 
+                alt="2048 Game" 
+                className="w-16 h-16 rounded-lg"
+              />
+            </div>
             <p className="text-gray-600 text-sm">Join tiles to reach 2048!</p>
           </div>
 
@@ -427,13 +516,14 @@ const Game2048 = () => {
               </div>
               <div className="text-2xl font-bold">{bestScore}</div>
             </div>
-            <button
-              onClick={() => setShowLeaderboard(true)}
-              className="bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600 text-white rounded-lg px-3 flex items-center justify-center transition-colors"
-              title="Leaderboard"
-            >
-              <Trophy size={24} />
-            </button>
+            {gameMode === 'timed' && (
+              <div className="flex-1 bg-gradient-to-r from-red-500 to-pink-500 rounded-lg p-3 text-white">
+                <div className="text-xs font-semibold uppercase flex items-center gap-1">
+                  <Clock size={12} /> Time
+                </div>
+                <div className="text-2xl font-bold">{timeLeft}s</div>
+              </div>
+            )}
             <button
               onClick={initGame}
               className="bg-gray-700 hover:bg-gray-800 text-white rounded-lg px-4 flex items-center justify-center transition-colors"
