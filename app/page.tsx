@@ -1,23 +1,21 @@
 'use client';
 
 import { useEffect } from 'react';
+import { sdk } from '@farcaster/frame-sdk';
 import Game2048 from '@/components/Game2048';
 
 export default function Home() {
   useEffect(() => {
-    // Only try to load Frame SDK in the browser after mount
-    if (typeof window !== 'undefined') {
-      import('@farcaster/frame-sdk')
-        .then((module) => {
-          return module.sdk.actions.ready();
-        })
-        .then(() => {
-          console.log('Frame SDK initialized');
-        })
-        .catch((error) => {
-          console.log('Running without Frame SDK');
-        });
-    }
+    const initSDK = async () => {
+      try {
+        await sdk.actions.ready();
+        console.log('Frame SDK initialized');
+      } catch (error) {
+        console.error('Failed to initialize SDK:', error);
+      }
+    };
+    
+    initSDK();
   }, []);
 
   return (
