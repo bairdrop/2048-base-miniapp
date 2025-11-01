@@ -1,42 +1,27 @@
-import type { Metadata } from "next";
-import "./globals.css";
+'use client';
 
-const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://2048-base-miniapp.vercel.app';
+import { useEffect } from 'react';
+import Game2048 from '@/components/Game2048';
 
-export const metadata: Metadata = {
-  title: "2048 Base Game",
-  description: "Play the classic 2048 puzzle game on Base",
-  openGraph: {
-    title: "2048 Base Game",
-    description: "Play the classic 2048 puzzle game on Base",
-    images: [`${appUrl}/screenshot1.png`],
-  },
-  other: {
-    'fc:frame': JSON.stringify({
-      version: 'next',
-      imageUrl: `${appUrl}/screenshot1.png`,
-      button: {
-        title: 'Play 2048',
-        action: {
-          type: 'launch_frame',
-          name: '2048 Base Game',
-          url: appUrl,
-          splashImageUrl: `${appUrl}/splash.png`,
-          splashBackgroundColor: '#8F7A66'
-        }
+export default function Home() {
+  useEffect(() => {
+    const initSDK = async () => {
+      try {
+        // Dynamically import to avoid build errors
+        const { sdk } = await import('@farcaster/frame-sdk');
+        await sdk.actions.ready();
+        console.log('Frame SDK initialized');
+      } catch (error) {
+        console.error('Frame SDK not available:', error);
       }
-    })
-  }
-};
+    };
+    
+    initSDK();
+  }, []);
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
   return (
-    <html lang="en">
-      <body>{children}</body>
-    </html>
+    <main className="min-h-screen">
+      <Game2048 />
+    </main>
   );
 }
